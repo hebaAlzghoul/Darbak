@@ -365,6 +365,7 @@ let lastFocusedElement = null;
 let translationRetryTimer = null;
 let currentUserTrips = [];
 let authMode = 'signin';
+let pendingGenerateTrip = false;
 let bookedExperiences = readLocalData('darbak-booked-experiences', []);
 let savedTripPlans = readLocalData('darbak-trip-plans', []);
 let currentTripPlan = savedTripPlans[0] || null;
@@ -454,20 +455,40 @@ async function initializeFirebaseIntegration() {
       await loadUserData(user.uid);
       await loadStoriesFromFirestore();
     } else {
-      savedPlaces = readLocalData('darbak-saved-places', [...DEFAULT_SAVED_PLACES]);
+      // User logged out — clear account-specific data
+
+      savedPlaces = [];
       favoritePlaces = new Set();
-      savedExperiences = new Set(readLocalData('darbak-saved-experiences', []));
+
+      savedExperiences = new Set();
       favoriteExperiences = new Set();
+
       currentUserTrips = [];
+      currentTripPlan = null;
+
+      bookedExperiences = [];
+
+      // Clear planning/calendar data
+      scheduledPlaces = {};
+
+      // Clear account-specific local storage
+      localStorage.removeItem('darbak-saved-places');
+      localStorage.removeItem('darbak-saved-experiences');
+      localStorage.removeItem('darbak-booked-experiences');
+      localStorage.removeItem('darbak-trip-plans');
+
       updateSavedCount();
       renderWonders();
       renderExploreGrid();
       renderLocalGrid();
       renderCalendar(2026, 9);
       renderSavedList();
+      renderSavedTripDetails();
+
       await loadStoriesFromFirestore();
     }
-  });
+  }
+  );
 }
 
 async function ensureUserDocument(user) {
@@ -639,6 +660,14 @@ async function handleAuthSubmit(event) {
     }
     form.reset();
     closeModal('auth-modal');
+
+    if (pendingGenerateTrip) {
+      pendingGenerateTrip = false;
+
+      setTimeout(() => {
+        generateItinerary();
+      }, 300);
+    }
   } catch (error) {
     showToast(getFriendlyErrorMessage(error, 'Unable to complete authentication right now.'), 'error');
   } finally {
@@ -665,8 +694,9 @@ function setAuthMode(mode) {
     toggleButton.textContent = mode === 'signup' ? 'Already have an account? Sign in' : 'Need an account? Create one';
   }
 }
-
 async function saveCurrentTripToFirestore() {
+  if (!requireAuth('save your trip')) return false;
+
   if (!currentTripPlan) {
     showToast('Generate an itinerary before saving it.', 'info');
     return false;
@@ -1122,6 +1152,13 @@ function getTravelLabel(minutes) {
 }
 
 function generateItinerary() {
+  if (!firebaseState.user) {
+    pendingGenerateTrip = true;
+    openAuthModal();
+    showToast('Please sign in or create an account to generate your trip.', 'info');
+    return;
+  }
+
   const daysInput = document.getElementById('trip-custom-days');
   const requestedDays = Number(daysInput?.value || itineraryDays);
   if (!Number.isInteger(requestedDays) || requestedDays < 1 || requestedDays > 30) {
@@ -1553,30 +1590,39 @@ function speakArabicWord(text) {
 
 // Toggle Save
 async function toggleSave(placeId) {
+  if (!requireAuth('save this destination')) return;
+
   const alreadySaved = savedPlaces.includes(placeId);
-  if (!firebaseState.user || !firebaseState.db) {
-    savedPlaces = alreadySaved
-      ? savedPlaces.filter(id => id !== placeId)
-      : [...savedPlaces, placeId];
-    localStorage.setItem('darbak-saved-places', JSON.stringify(savedPlaces));
-    showToast(alreadySaved ? 'Destination removed from My Trip.' : 'Destination saved to My Trip.', alreadySaved ? 'info' : 'success');
-  } else {
-    try {
-      if (alreadySaved) {
-        await removePlaceFromFirestore(placeId);
+
+  try {
+    if (alreadySaved) {
+      const removed = await removePlaceFromFirestore(placeId);
+
+      if (removed !== false) {
         showToast('Destination removed from My Trip.', 'info');
-      } else {
-        await savePlaceToFirestore(placeId);
+      }
+    } else {
+      const saved = await savePlaceToFirestore(placeId);
+
+      if (saved !== false) {
         showToast('Destination saved to My Trip.', 'success');
       }
-    } catch (error) {
-      showToast(getFriendlyErrorMessage(error, 'Unable to update this destination right now.'), 'error');
     }
+  } catch (error) {
+    showToast(
+      getFriendlyErrorMessage(
+        error,
+        'Unable to update this destination right now.'
+      ),
+      'error'
+    );
   }
 
   updateSavedCount();
   renderWonders();
   renderExploreGrid();
+  renderLocalGrid();
+  renderSavedList();
   updateActivePinCard();
   renderCalendar(2026, 9);
 }
@@ -1683,9 +1729,9 @@ function renderSavedTripDetails() {
   const savedItinerary = currentTripPlan?.itinerary?.length ? `<section class="saved-itinerary-summary" aria-label="Saved itinerary days">
     <h3>${currentTripPlan.duration}-Day Itinerary</h3>
     <ol>${currentTripPlan.itinerary.map((entry, index) => {
-      const place = PLACES.find(item => item.id === entry.placeId);
-      return `<li><strong>Day ${index + 1}: ${place?.name || entry.destination}</strong><span>${entry.activities?.[0] || ''}</span><small>Estimated travel: ${entry.travelTime || 'Not available'}</small></li>`;
-    }).join('')}</ol>
+    const place = PLACES.find(item => item.id === entry.placeId);
+    return `<li><strong>Day ${index + 1}: ${place?.name || entry.destination}</strong><span>${entry.activities?.[0] || ''}</span><small>Estimated travel: ${entry.travelTime || 'Not available'}</small></li>`;
+  }).join('')}</ol>
   </section>` : '';
 
   if (overview) {
