@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Darbak Jordan · دربك الأردن </title>
+  <meta name="description" content="Discover Jordan with Darbak Jordan. Explore hidden gems, historic sites, nature, local experiences, and plan your perfect trip.">
+  <meta property="og:title" content="Darbak Jordan">
+  <meta property="og:description" content="Discover Jordan with Darbak Jordan. Explore hidden gems, historic sites, nature, local experiences, and plan your perfect trip.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="assets/logo.png" type="image/png">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- =========================================================================
+       Navigation Bar
+       ========================================================================= -->
+  <header class="header">
+    <div class="container header-inner">
+      <button type="button" class="brand" data-target="home" aria-label="Go to the home page">
+        <div class="brand-icon">
+          <img class="brand-logo" src="assets/logo.png" alt="Darbak Jordan logo">
+        </div>
+      </button>
+
+      <button type="button" class="mobile-toggle" id="mobile-nav-toggle" aria-label="Open navigation" aria-expanded="false" aria-controls="primary-navigation">☰</button>
+      <nav class="nav-links" id="primary-navigation" aria-label="Primary navigation">
+        <a href="#explore" class="nav-link" data-target="explore">Explore</a>
+        <a href="#jmap" class="nav-link" data-target="jmap">JMap</a>
+        <a href="#local" class="nav-link" data-target="local">Live Like a Local</a>
+        <a href="#what-we-do" class="nav-link" data-target="what-we-do">What We Do</a>
+        <a href="#stories" class="nav-link" data-target="stories">Traveler Stories</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="btn-lang" id="btn-lang" aria-label="Choose language" aria-expanded="false" aria-controls="language-menu">
+          <svg class="header-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"></path></svg>
+          <span id="lang-label">English</span>
+        </button>
+        <div class="language-menu" id="language-menu" hidden role="menu" aria-label="Select language">
+          <button type="button" role="menuitem" data-language="en">English</button>
+          <button type="button" role="menuitem" data-language="ar">Arabic</button>
+        </div>
+        <button class="header-icon-button" id="btn-accessibility" aria-label="Accessibility settings" aria-expanded="false" aria-controls="accessibility-panel" title="Accessibility">
+          <svg class="header-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4.5" r="2"></circle><path d="M4 8.5h16M12 8.5v4m0 0-4 8m4-8 4 8m-4-8-5-3m5 3 5-3"></path></svg>
+        </button>
+        <button class="btn-saved" id="btn-saved-header" data-target="saved">
+          My trip <span id="saved-count" class="saved-counter">3</span>
+        </button>
+        <button class="btn-login" id="btn-login-header">Login</button>
+      </div>
+    </div>
+    <section class="accessibility-panel" id="accessibility-panel" hidden aria-label="Accessibility settings">
+      <div class="accessibility-panel-head"><h2>Accessibility</h2><button type="button" class="panel-close" aria-label="Close accessibility settings">×</button></div>
+      <div class="accessibility-controls">
+        <button type="button" data-accessibility="text-down">Decrease text size</button>
+        <button type="button" data-accessibility="text-up">Increase text size</button>
+        <label><input type="checkbox" data-accessibility="contrast"> High contrast</label>
+        <label><input type="checkbox" data-accessibility="motion"> Reduce motion</label>
+        <label><input type="checkbox" data-accessibility="keyboard"> Keyboard navigation</label>
+        <label><input type="checkbox" data-accessibility="focus"> Enhanced focus indicators</label>
+        <label><input type="checkbox" data-accessibility="speech"> Text-to-speech</label>
+        <label><input type="checkbox" data-accessibility="direction"> RTL / LTR support</label>
+      </div>
+      <button type="button" class="accessibility-reset" data-accessibility="reset">Reset accessibility settings</button>
+    </section>
+  </header>
+
+  <!-- =========================================================================
+       PAGE 1: Home View
+       ========================================================================= -->
+  <main id="view-home" class="view-section active">
+    <section class="hero-section">
+      <div class="container hero-grid">
+        <div>
+          <h1 class="page-title font-serif">
+            Discover Jordan<br>
+            <span class="hero-highlight">Your Way</span>
+          </h1>
+          <p class="page-desc">
+            Explore hidden gems, iconic landmarks, local experiences, and build your perfect Jordan itinerary.
+          </p>
+          <div class="hero-buttons">
+            <button class="btn-primary" data-target="dream-trip">Plan My Trip</button>
+            <button class="btn-outline" data-target="about">About Jordan</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="hero-map-frame">
+            <img src="assets/map-photo.png" alt="Illustrated map of Jordan showing major destinations and travel routes">
+            <button class="btn-primary hero-map-button" data-target="jmap">
+              Open JMap →
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Ribbon -->
+    <section class="stats-ribbon">
+      <div class="container stats-grid">
+        <div class="stat-item">
+          <span class="stat-number" style="color: #F87171;">Featured</span>
+          <span class="stat-label">Destinations</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" style="color: #FBBF24;">Local</span>
+          <span class="stat-label">Experiences</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" style="color: #2DD4BF;">Map</span>
+          <span class="stat-label">Planning</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">Flexible</span>
+          <span class="stat-label">Itineraries</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Wonders of Jordan -->
+    <section class="section-padding">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="kicker">Featured Places</span>
+            <h2 class="font-serif" style="font-size: 2.25rem;">Popular Destinations</h2>
+          </div>
+          <a href="#explore" class="link-arrow" data-target="explore">Explore All Destinations →</a>
+        </div>
+
+        <div id="wonders-grid" class="cards-grid-4"></div>
+      </div>
+    </section>
+
+    <!-- Why Discerning Travelers Choose Darbak -->
+    <section class="section-padding" style="background-color: var(--bg-sand); border-top: 1px solid var(--border);">
+      <div class="container">
+        <div style="text-align: center; margin-bottom: 3.5rem;">
+          <span class="kicker">How Darbak Helps</span>
+          <h2 class="font-serif" style="font-size: 2.25rem;">Plan a Jordan Trip That Fits Your Style</h2>
+        </div>
+
+        <div class="pillars-grid">
+          <div class="pillar-card">
+            <div class="pillar-icon">👥</div>
+            <h3 class="pillar-title">Local-first Ideas</h3>
+            <p class="pillar-text">The route suggestions are shaped by Jordanian perspectives, practical travel experience, and neighborhood knowledge.</p>
+          </div>
+          <div class="pillar-card">
+            <div class="pillar-icon" style="background: #E0F2FE; color: #0284C7;">🗺️</div>
+            <h3 class="pillar-title">JMap Planning Made Clear</h3>
+            <p class="pillar-text">Use the map to compare destinations by region, route, and travel style before you lock in your day plan.</p>
+          </div>
+          <div class="pillar-card">
+            <div class="pillar-icon" style="background: #D1FAE5; color: #059669;">🛡️</div>
+            <h3 class="pillar-title">Practical, Trusted Guidance</h3>
+            <p class="pillar-text">Each suggestion is framed around seasonality, logistics, and sensible local advice so you can travel with confidence.</p>
+          </div>
+        </div>
+
+        <div class="quote-box">
+          <blockquote class="quote-text font-serif">
+            “The map made it easy to plan our route, and the local experience in Salt gave our trip a more personal feel.”
+          </blockquote>
+          <div class="quote-author">A traveler in Jordan</div>
+          <div class="quote-loc">Built for planning and discovery</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================================
+       PAGE 2: What We Do View
+       ========================================================================= -->
+  <main id="view-what-we-do" class="view-section">
+    <section class="hero-section" style="text-align: center; padding: 4rem 0;">
+      <div class="container">
+        <span class="kicker">Bespoke Jordan Experiences</span>
+        <h1 class="page-title font-serif" style="font-size: 3rem;">Your Gateway to Jordan</h1>
+        <p class="page-desc" style="margin: 0 auto;">We merge deep local wisdom with smart visual planning to let you live Jordan's story, not just tour its monuments.</p>
+      </div>
+    </section>
+
+    <section class="section-padding">
+      <div class="container">
+        <div style="text-align: center; margin-bottom: 3.5rem;">
+          <span class="kicker">What We Do</span>
+          <h2 class="font-serif" style="font-size: 2.25rem;">Six Pillars of Perfect Travels</h2>
+        </div>
+
+        <div class="cards-grid-3">
+          <div class="card">
+            <div class="card-img-wrap"><img src="assets/dead_sea.jpg" alt="Hidden Places"></div>
+            <div class="card-body">
+              <h3 class="card-title">Discovering Hidden Places</h3>
+              <p class="card-desc">Go beyond standard tour paths. Uncover secret water pools in Wadi Mujib and remote Roman outpost forts in the eastern desert.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-img-wrap"><img src="assets/jerash.jpg" alt="Cultural Deep Dives"></div>
+            <div class="card-body">
+              <h3 class="card-title">Cultural Deep Dives</h3>
+              <p class="card-desc">Trace ancient histories. Meet the archaeologists unearthing Jerash and Jordan's oldest civilizations.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-img-wrap"><img src="assets/mansaf.jpg" alt="Authentic Food"></div>
+            <div class="card-body">
+              <h3 class="card-title">Authentic Food Experiences</h3>
+              <p class="card-desc">Bake fresh Shrak bread in desert sand, sample premium olive oils in Salt, and host traditional dinners.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-img-wrap"><img src="assets/hero_map.jpg" alt="Smart Planning"></div>
+            <div class="card-body">
+              <h3 class="card-title">Smart Trip Planning</h3>
+              <p class="card-desc">A simple itinerary builder that groups your interests, route ideas, and must-see stops into a practical plan.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-img-wrap"><img src="assets/bedouin_tea.jpg" alt="Homestays"></div>
+            <div class="card-body">
+              <h3 class="card-title">Local Experiences & Homestays</h3>
+              <p class="card-desc">Stay in heritage stone homes in Salt or authentic desert wool tents. Share morning tea and life stories.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-img-wrap"><img src="assets/petra.jpg" alt="Organize Destinations"></div>
+            <div class="card-body">
+              <h3 class="card-title">Save & Organize Destinations</h3>
+              <p class="card-desc">Keep a shortlist of places you want to revisit and build a route around your favorite Jordan moments.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="section-padding" style="background-color: var(--bg-sand); border-top: 1px solid var(--border);">
+      <div class="container">
+        <div style="text-align: center; margin-bottom: 3rem;">
+          <span class="kicker">Three Simple Milestones</span>
+          <h2 class="font-serif" style="font-size: 2.25rem;">How It Works</h2>
+        </div>
+        <div class="pillars-grid">
+          <div class="pillar-card">
+            <span class="font-serif" style="font-size: 1.75rem; font-weight: 700; color: var(--primary);">01</span>
+            <h3 class="pillar-title">Explore</h3>
+            <p class="pillar-text">Browse local gems, historic paths, and food guides. Filter by intensity, region, or wellness focus.</p>
+          </div>
+          <div class="pillar-card">
+            <span class="font-serif" style="font-size: 1.75rem; font-weight: 700; color: var(--primary);">02</span>
+            <h3 class="pillar-title">Plan Your Path</h3>
+            <p class="pillar-text">Use the smart JMap builder to drop pins, reserve local homestays, and synchronize travel times.</p>
+          </div>
+          <div class="pillar-card">
+            <span class="font-serif" style="font-size: 1.75rem; font-weight: 700; color: var(--primary);">03</span>
+            <h3 class="pillar-title">Experience Jordan</h3>
+            <p class="pillar-text">Head out with a clear route, a saved shortlist, and practical local recommendations for each stop.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================================
+       PAGE 3: Explore Jordan View
+       ========================================================================= -->
+  <main id="view-explore" class="view-section">
+    <div class="container" style="padding-top: 3rem; padding-bottom: 5rem;">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <span class="kicker">Unveil Wonders</span>
+        <h1 class="page-title font-serif">Explore Jordan</h1>
+      </div>
+
+      <!-- Search bar -->
+      <div class="search-field explore-search-field">
+        <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg>
+        <input type="search" id="explore-search" class="search-input" placeholder="Search Jordan destinations..." aria-label="Search destinations">
+      </div>
+
+      <!-- Categories Tabs -->
+      <div class="filter-tags explore-filters" role="tablist" aria-label="Destination categories">
+        <button class="filter-tag-btn active" role="tab" aria-selected="true" data-explore-category="all">All</button>
+        <button class="filter-tag-btn" role="tab" aria-selected="false" data-explore-category="hidden-gems">Hidden Gems</button>
+        <button class="filter-tag-btn" role="tab" aria-selected="false" data-explore-category="history">History &amp; Culture</button>
+        <button class="filter-tag-btn" role="tab" aria-selected="false" data-explore-category="nature">Nature</button>
+        <button class="filter-tag-btn" role="tab" aria-selected="false" data-explore-category="adventure">Adventure</button>
+        <button class="filter-tag-btn" role="tab" aria-selected="false" data-explore-category="relaxation">Relaxation</button>
+        <button class="filter-tag-btn" role="tab" aria-selected="false" data-explore-category="medical">Medical Tourism</button>
+        <button class="filter-tag-btn" role="tab" aria-selected="false" data-explore-category="events">Events</button>
+        <button class="filter-tag-btn" role="tab" aria-selected="false" data-explore-category="food">Food</button>
+      </div>
+
+      <!-- Destination Cards -->
+      <div id="explore-grid" class="cards-grid-3"></div>
+      <p id="explore-empty" class="empty-state" hidden>No destinations match your search.</p>
+      <button id="explore-load-more" class="btn-outline load-more-button" type="button" onclick="loadMoreExplorePlaces()">Load More</button>
+    </div>
+  </main>
+
+  <!-- =========================================================================
+       PAGE 4: JMap Interactive Map View
+       ========================================================================= -->
+  <main id="view-jmap" class="view-section">
+    <div class="jmap-container">
+      <!-- Sidebar -->
+      <aside class="jmap-sidebar">
+        <div class="search-field">
+          <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg>
+          <input type="search" id="jmap-search" class="search-input" placeholder="Search JMap landmarks..." aria-label="Search map locations">
+        </div>
+
+        <div>
+          <span style="font-size: 0.68rem; font-weight: 700; text-transform: uppercase; color: #78716C; margin-bottom: 8px; display: block;">Map Filters</span>
+          <div class="filter-tags">
+            <button class="filter-tag-btn active" data-map-category="all" aria-pressed="true">All</button>
+            <button class="filter-tag-btn" data-map-category="history" aria-pressed="false">Historical</button>
+            <button class="filter-tag-btn" data-map-category="nature" aria-pressed="false">Nature</button>
+            <button class="filter-tag-btn" data-map-category="food" aria-pressed="false">Restaurants</button>
+            <button class="filter-tag-btn" data-map-category="relaxation" aria-pressed="false">Hotels &amp; Wellness</button>
+            <button class="filter-tag-btn" data-map-category="adventure" aria-pressed="false">Adventure</button>
+          </div>
+        </div>
+        <div class="map-nearby-actions">
+          <button class="btn-outline" id="map-near-me" type="button">Near Me</button>
+          <button class="btn-outline" id="map-near-amman" type="button">Near Amman</button>
+          <button class="btn-outline" id="map-trending" type="button">Trending</button>
+        </div>
+        <p id="map-status" class="map-status" role="status" aria-live="polite"></p>
+
+        <!-- Weather Box -->
+        <div class="weather-box">
+          <div class="weather-top">
+            <span>Amman Weather</span>
+            <span>Today</span>
+          </div>
+          <div class="weather-body">
+            <div>
+              <p style="font-size: 0.8rem; font-weight: 600;">Sunny · Clear Sky</p>
+              <p style="font-size: 0.72rem; color: #78716C;">Light desert breeze</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="weather-temp font-serif">28°C</span>
+              <span style="font-size: 1.5rem;">☀️</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filtered Map Locations -->
+        <div>
+          <span id="map-trending-heading" class="map-list-heading">Jordan Highlights</span>
+          <div id="map-trending-list" class="map-trending-list"></div>
+        </div>
+      </aside>
+
+      <!-- Map Canvas -->
+      <div class="jmap-canvas-wrap">
+        <div class="jmap-canvas" id="jmap-canvas"></div>
+        <div class="active-pin-card" id="active-pin-card"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- =========================================================================
+       PAGE 5: Design My Dream Trip View
+       ========================================================================= -->
+  <main id="view-dream-trip" class="view-section">
+    <div class="container" style="padding-top: 3rem; padding-bottom: 5rem; max-width: 900px;">
+      <div style="text-align: center; margin-bottom: 2.5rem;">
+        <span class="kicker">Trip Planning</span>
+        <h1 class="page-title font-serif">Plan My Trip</h1>
+        <p class="page-desc" style="margin: 0 auto;">Choose your interests, budget, trip length, and travel style to build a practical Jordan itinerary.</p>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-box">
+        <h3 class="font-serif" style="font-size: 1.2rem; margin-bottom: 1rem;">
+          <span class="step-num">1</span> How Many Days?
+        </h3>
+        <p id="trip-duration-label" style="font-size: 0.8rem; color: #78716C; margin-bottom: 1rem;">Duration: 5 Days</p>
+        <div class="filter-tags">
+          <button class="filter-tag-btn" type="button" data-trip-days="3" aria-pressed="false">3 Days</button>
+          <button class="filter-tag-btn" type="button" data-trip-days="5" aria-pressed="false">5 Days</button>
+          <button class="filter-tag-btn" type="button" data-trip-days="7" aria-pressed="false">7 Days</button>
+          <button class="filter-tag-btn" type="button" data-trip-days="10" aria-pressed="false">10 Days</button>
+          <button class="filter-tag-btn" type="button" data-trip-days="14" aria-pressed="false">14 Days</button>
+        </div>
+        <div class="custom-days-control">
+          <label for="trip-custom-days">Or enter another number of days</label>
+          <input id="trip-custom-days" type="number" min="1" max="30" value="5" class="search-input">
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-box">
+        <h3 class="font-serif" style="font-size: 1.2rem; margin-bottom: 1rem;">
+          <span class="step-num">2</span> Your Interests
+        </h3>
+        <div class="filter-tags">
+          <button class="filter-tag-btn" type="button" data-trip-interest="adventure" aria-pressed="false">Adventure</button>
+          <button class="filter-tag-btn" type="button" data-trip-interest="history" aria-pressed="false">History</button>
+          <button class="filter-tag-btn" type="button" data-trip-interest="food" aria-pressed="false">Food</button>
+          <button class="filter-tag-btn" type="button" data-trip-interest="nature" aria-pressed="false">Nature</button>
+          <button class="filter-tag-btn" type="button" data-trip-interest="relaxation" aria-pressed="false">Relaxation</button>
+          <button class="filter-tag-btn" type="button" data-trip-interest="culture" aria-pressed="false">Culture</button>
+          <button class="filter-tag-btn" type="button" data-trip-interest="photography" aria-pressed="false">Photography</button>
+          <button class="filter-tag-btn" type="button" data-trip-interest="family" aria-pressed="false">Family</button>
+        </div>
+      </div>
+
+      <div class="step-box">
+        <h3 class="font-serif" style="font-size: 1.2rem; margin-bottom: 1rem;">
+          <span class="step-num">3</span> Your Budget
+        </h3>
+        <p class="trip-hint">Estimated daily spend per traveler, excluding flights and booked experiences.</p>
+        <div class="filter-tags budget-options" role="group" aria-label="Choose daily trip budget">
+          <button class="filter-tag-btn" type="button" data-trip-budget="budget" aria-pressed="false">Budget</button>
+          <button class="filter-tag-btn active" type="button" data-trip-budget="balanced" aria-pressed="true">Balanced</button>
+          <button class="filter-tag-btn" type="button" data-trip-budget="comfort" aria-pressed="false">Comfort</button>
+        </div>
+      </div>
+
+      <div class="step-box">
+        <h3 class="font-serif" style="font-size: 1.2rem; margin-bottom: 1rem;">
+          <span class="step-num">4</span> Traveler Type
+        </h3>
+        <div class="cards-grid-4">
+          <div class="trip-type-card" style="border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius-sm); text-align: center;">
+            <h4 style="font-size: 0.85rem; font-weight: 700;">Solo</h4>
+            <p style="font-size: 0.72rem; color: #78716C; margin: 4px 0 10px;">For independent discoverers</p>
+            <button class="btn-outline" type="button" data-trip-type="solo" style="padding: 4px 10px; font-size: 0.7rem;">Select</button>
+          </div>
+          <div class="trip-type-card" style="border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius-sm); text-align: center;">
+            <h4 style="font-size: 0.85rem; font-weight: 700;">Couple</h4>
+            <p style="font-size: 0.72rem; color: #78716C; margin: 4px 0 10px;">Intimate wellness & sunsets</p>
+            <button class="btn-outline" type="button" data-trip-type="couple" aria-pressed="false" style="padding: 4px 10px; font-size: 0.7rem;">Select</button>
+          </div>
+          <div class="trip-type-card" style="border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius-sm); text-align: center;">
+            <h4 style="font-size: 0.85rem; font-weight: 700;">Family</h4>
+            <p style="font-size: 0.72rem; color: #78716C; margin: 4px 0 10px;">Safe, child-friendly paths</p>
+            <button class="btn-outline" type="button" data-trip-type="family" style="padding: 4px 10px; font-size: 0.7rem;">Select</button>
+          </div>
+          <div class="trip-type-card" style="border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius-sm); text-align: center;">
+            <h4 style="font-size: 0.85rem; font-weight: 700;">Group</h4>
+            <p style="font-size: 0.72rem; color: #78716C; margin: 4px 0 10px;">High-octane desert adventure</p>
+            <button class="btn-outline" type="button" data-trip-type="group" style="padding: 4px 10px; font-size: 0.7rem;">Select</button>
+          </div>
+        </div>
+      </div>
+
+      <section class="itinerary-section" aria-labelledby="itinerary-title">
+        <div class="itinerary-heading">
+          <div>
+            <span class="kicker">Your Jordan Journey</span>
+            <h2 id="itinerary-title" class="font-serif">Your 5-Day Jordan Itinerary</h2>
+          </div>
+          <div class="itinerary-actions">
+            <button class="btn-primary" id="generate-itinerary" type="button">Generate</button>
+          </div>
+        </div>
+        <div id="itinerary-results" class="itinerary-results" aria-live="polite"></div>
+        <p id="itinerary-estimate" class="itinerary-estimate" hidden></p>
+        <div class="itinerary-result-actions" id="itinerary-result-actions" hidden>
+          <button class="btn-outline" id="edit-itinerary" type="button">Edit</button>
+          <button class="btn-primary" id="save-itinerary" type="button">Save to My Trip</button>
+        </div>
+      </section>
+
+      <!-- Legacy sample retained as hidden reference content -->
+      <div class="sample-itinerary" style="margin-top: 3rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+          <div>
+            <span class="kicker">Instant Sample Result</span>
+            <h2 class="font-serif" style="font-size: 1.85rem;">Your 5-Day Jordan Odyssey</h2>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn-outline" type="button" data-action="save-itinerary">Save Itinerary</button>
+            <button class="btn-primary" type="button" data-action="booking-request">Proceed with Booking</button>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <img src="assets/amman_citadel.jpg" class="timeline-thumb">
+          <div style="flex: 1;">
+            <span style="font-size: 0.7rem; font-weight: 700; color: var(--primary);">DAY 1</span>
+            <h4 style="font-family: var(--font-serif); font-size: 1rem; font-weight: 600;">Amman Arrival & Citadels Walks</h4>
+            <p style="font-size: 0.75rem; color: #78716C;">Roman Amphitheater, local dining, authentic street food. Dinner: Hashem Restaurant</p>
+          </div>
+          <span style="font-size: 0.75rem; color: #A8A29E;">Travel Time: 45 min</span>
+        </div>
+
+        <div class="timeline-item">
+          <img src="assets/petra.jpg" class="timeline-thumb">
+          <div style="flex: 1;">
+            <span style="font-size: 0.7rem; font-weight: 700; color: var(--primary);">DAY 2</span>
+            <h4 style="font-family: var(--font-serif); font-size: 1rem; font-weight: 600;">Petra Treasuries & Sandstone Canyons</h4>
+            <p style="font-size: 0.75rem; color: #78716C;">Treasury walk, high altar tombs tour, Petra candle walks. Lunch: Bedouin Trail Pack</p>
+          </div>
+          <span style="font-size: 0.75rem; color: #A8A29E;">Travel Time: 3.5 hrs</span>
+        </div>
+
+        <div class="timeline-item">
+          <img src="assets/wadi_rum.jpg" class="timeline-thumb">
+          <div style="flex: 1;">
+            <span style="font-size: 0.7rem; font-weight: 700; color: var(--primary);">DAY 3</span>
+            <h4 style="font-family: var(--font-serif); font-size: 1rem; font-weight: 600;">Red Desert Wilderness of Wadi Rum</h4>
+            <p style="font-size: 0.75rem; color: #78716C;">4x4 sunset desert tour, stargazing overnight experience. Dinner: Zarb Under the Ground</p>
+          </div>
+          <span style="font-size: 0.75rem; color: #A8A29E;">Travel Time: 1.5 hrs</span>
+        </div>
+
+        <div class="timeline-item">
+          <img src="assets/dead_sea.jpg" class="timeline-thumb">
+          <div style="flex: 1;">
+            <span style="font-size: 0.7rem; font-weight: 700; color: var(--primary);">DAY 4</span>
+            <h4 style="font-family: var(--font-serif); font-size: 1rem; font-weight: 600;">Dead Sea Sunset Floating</h4>
+            <p style="font-size: 0.75rem; color: #78716C;">Absolute peace mineral relaxation, custom organic mud baths. Lunch: Panoramic Cliffs Bistro</p>
+          </div>
+          <span style="font-size: 0.75rem; color: #A8A29E;">Travel Time: 2.5 hrs</span>
+        </div>
+
+        <div class="timeline-item">
+          <img src="assets/jerash.jpg" class="timeline-thumb">
+          <div style="flex: 1;">
+            <span style="font-size: 0.7rem; font-weight: 700; color: var(--primary);">DAY 5</span>
+            <h4 style="font-family: var(--font-serif); font-size: 1rem; font-weight: 600;">Ancient Jerash Theater walk</h4>
+            <p style="font-size: 0.75rem; color: #78716C;">Walking column streets, Roman archways guides. Lunch: Local Olive Farm Picnic</p>
+          </div>
+          <span style="font-size: 0.75rem; color: #A8A29E;">Travel Time: 1.5 hrs</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- =========================================================================
+       PAGE 6: About Jordan View
+       ========================================================================= -->
+  <main id="view-about" class="view-section">
+    <section class="hero-section" style="text-align: center; padding: 4rem 0;">
+      <div class="container">
+        <span class="kicker">Cradle of Civilizations</span>
+        <h1 class="page-title font-serif" style="font-size: 3rem;">Discover the Heart of Jordan</h1>
+        <p class="page-desc" style="margin: 0 auto;">From the bustling ancient souqs of Amman to the peaceful desert depths of Wadi Rum, journey through a landscape carved by empires.</p>
+      </div>
+    </section>
+
+    <!-- Jordan guide categories -->
+    <section class="section-padding">
+      <div class="container">
+        <div class="about-heading">
+          <span class="kicker">A Local Introduction</span>
+          <h2 class="font-serif">Get to Know Jordan</h2>
+        </div>
+        <div class="about-category-tabs" role="tablist" aria-label="Jordan information categories">
+          <button type="button" class="about-category-tab active" id="about-tab-cities" role="tab" aria-selected="true" aria-controls="about-panel-cities" data-about-category="cities">Cities</button>
+          <button type="button" class="about-category-tab" id="about-tab-culture" role="tab" aria-selected="false" aria-controls="about-panel-culture" data-about-category="culture">Culture</button>
+          <button type="button" class="about-category-tab" id="about-tab-history" role="tab" aria-selected="false" aria-controls="about-panel-history" data-about-category="history">History</button>
+          <button type="button" class="about-category-tab" id="about-tab-habits" role="tab" aria-selected="false" aria-controls="about-panel-habits" data-about-category="habits">Habits</button>
+          <button type="button" class="about-category-tab" id="about-tab-words" role="tab" aria-selected="false" aria-controls="about-panel-words" data-about-category="words">Popular Words</button>
+        </div>
+        <section class="about-category-panel" id="about-panel-cities" role="tabpanel" aria-labelledby="about-tab-cities" data-about-panel="cities">
+          <div class="city-directory-heading">
+            <h3 class="font-serif">Cities &amp; Towns Across Jordan</h3>
+            <p>Choose a place to read about it and open its location on JMap.</p>
+          </div>
+          <section class="city-detail-panel" id="jordan-city-details" tabindex="-1" aria-live="polite" hidden></section>
+          <div class="cards-grid-3 jordan-cities-grid" id="jordan-cities-grid"></div>
+        </section>
+        <section class="about-category-panel" id="about-panel-culture" role="tabpanel" aria-labelledby="about-tab-culture" data-about-panel="culture" hidden>
+          <div class="cards-grid-3">
+            <article class="about-text-card"><span>01</span><h3>Hospitality</h3><p>Guests are often welcomed with Arabic coffee or tea. Accepting a cup and taking time to talk is a lovely way to connect.</p></article>
+            <article class="about-text-card"><span>02</span><h3>Food &amp; sharing</h3><p>Meals such as mansaf are traditionally shared. Bread can be used to scoop food, and hosts may encourage guests to take another serving.</p></article>
+            <article class="about-text-card"><span>03</span><h3>Craft &amp; celebration</h3><p>Discover embroidery, music, dabkeh dancing, and regional crafts. Customs vary by family and community, so follow your host's lead.</p></article>
+          </div>
+        </section>
+        <section class="about-category-panel" id="about-panel-history" role="tabpanel" aria-labelledby="about-tab-history" data-about-panel="history" hidden>
+          <div class="cards-grid-3">
+            <article class="about-text-card"><span>01</span><h3>Nabataean Petra</h3><p>Petra grew into a major Nabataean trading center, known for its rock-cut architecture and sophisticated water-management systems.</p></article>
+            <article class="about-text-card"><span>02</span><h3>Roman Decapolis</h3><p>Jerash preserves colonnaded streets, temples, and theaters that reveal the scale of Roman-era life in the region.</p></article>
+            <article class="about-text-card"><span>03</span><h3>Layers of Jordan</h3><p>From early settlements and Byzantine mosaics to Umayyad desert castles, Jordan's sites tell stories across many centuries.</p></article>
+          </div>
+        </section>
+        <section class="about-category-panel" id="about-panel-habits" role="tabpanel" aria-labelledby="about-tab-habits" data-about-panel="habits" hidden>
+          <div class="cards-grid-3">
+            <article class="about-text-card"><span>01</span><h3>Greetings</h3><p>A warm greeting matters. A friendly "marhaba" and a little time for conversation are appreciated before getting down to business.</p></article>
+            <article class="about-text-card"><span>02</span><h3>Dress &amp; visits</h3><p>Modest clothing is a considerate choice, especially in religious places and smaller towns. Ask before photographing people.</p></article>
+            <article class="about-text-card"><span>03</span><h3>Everyday pace</h3><p>Shop hours and routines can shift around Friday prayers and public holidays. Check opening times and allow room for unhurried visits.</p></article>
+          </div>
+        </section>
+        <section class="about-category-panel" id="about-panel-words" role="tabpanel" aria-labelledby="about-tab-words" data-about-panel="words" hidden>
+          <p class="audio-support-note" id="pronunciation-status" role="status" aria-live="polite"></p>
+          <div class="popular-words-list">
+            <article><strong>Marhaba</strong><span>Hello / welcome</span><small lang="ar">مَرْحَباً</small><button type="button" class="word-audio-button" data-pronounce-ar="مَرْحَباً" aria-label="Listen to Marhaba in Arabic">🔊 Listen</button></article>
+            <article><strong>Shukran</strong><span>Thank you</span><small lang="ar">شُكْراً</small><button type="button" class="word-audio-button" data-pronounce-ar="شُكْراً" aria-label="Listen to Shukran in Arabic">🔊 Listen</button></article>
+            <article><strong>Yalla</strong><span>Let's go / come on</span><small lang="ar">يَلّا</small><button type="button" class="word-audio-button" data-pronounce-ar="يَلّا" aria-label="Listen to Yalla in Arabic">🔊 Listen</button></article>
+            <article><strong>Inshallah</strong><span>God willing</span><small lang="ar">إِنْ شاءَ الله</small><button type="button" class="word-audio-button" data-pronounce-ar="إِنْ شاءَ الله" aria-label="Listen to Inshallah in Arabic">🔊 Listen</button></article>
+            <article><strong>Afwan</strong><span>You're welcome / excuse me</span><small lang="ar">عَفْواً</small><button type="button" class="word-audio-button" data-pronounce-ar="عَفْواً" aria-label="Listen to Afwan in Arabic">🔊 Listen</button></article>
+            <article><strong>Keef halak?</strong><span>How are you? (to a man)</span><small lang="ar">كِيف حالَك؟</small><button type="button" class="word-audio-button" data-pronounce-ar="كِيف حالَك؟" aria-label="Listen to Keef halak in Arabic">🔊 Listen</button></article>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================================
+       PAGE 7: Live Like a Local View
+       ========================================================================= -->
+  <main id="view-local" class="view-section">
+    <section class="hero-section" style="text-align: center; padding: 4rem 0;">
+      <div class="container">
+        <span class="kicker">Beyond Sightseeing</span>
+        <h1 class="page-title font-serif" style="font-size: 3rem;">Live Like a Local</h1>
+        <p class="page-desc" style="margin: 0 auto;">Step off the tour bus and into the hearts of Jordanian families. Share stories, learn centuries-old crafts, and participate in authentic daily traditions.</p>
+      </div>
+    </section>
+
+    <section class="local-life-feature" aria-label="Jordanian local life">
+      <img src="assets/bedouin_tea.jpg" alt="A traditional Jordanian coffee service shared in a Bedouin setting" loading="lazy">
+      <div class="local-life-caption"><span class="kicker">Step Off</span><p>Into a slower rhythm of shared meals, skilled hands, and stories passed around the table.</p></div>
+    </section>
+
+    <section class="section-padding">
+      <div class="container">
+        <div style="margin-bottom: 2rem;">
+          <span class="kicker">Immersive Exchanges</span>
+          <h2 class="font-serif" style="font-size: 2rem;">Curated Local Experiences</h2>
+        </div>
+        <div id="local-grid" class="cards-grid-4"></div>
+      </div>
+    </section>
+
+    <section class="section-padding local-steps-section">
+      <div class="container">
+        <div class="local-steps-heading">
+          <span class="kicker">BESPOKE JOURNEY STEPS</span>
+          <h2 class="font-serif">How It Works</h2>
+        </div>
+        <div class="local-steps-grid">
+          <article class="local-step"><span>01</span><h3>Browse &amp; Select</h3><p>Discover curated local workshops, home-cooking hosts, community experiences, and reserve.</p></article>
+          <article class="local-step"><span>02</span><h3>Instant Booking</h3><p>Reserve available dates securely and easily.</p></article>
+          <article class="local-step"><span>03</span><h3>Immerse Yourself</h3><p>Receive directions and local assistance during the experience.</p></article>
+          <article class="local-step"><span>04</span><h3>Support Community</h3><p>Support local families, hosts, and traditional Jordanian heritage.</p></article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================================
+       PAGE 8: Tourists Stories View
+       ========================================================================= -->
+  <main id="view-stories" class="view-section">
+    <section class="hero-section" style="text-align: center; padding: 4rem 0;">
+      <div class="container">
+        <span class="kicker">Shared Wisdom</span>
+        <h1 class="page-title font-serif" style="font-size: 3rem;">Stories from Fellow Travelers</h1>
+        <p class="page-desc" style="margin: 0 auto;">Explore authentic logs, high trail itineraries, and heartwarming homestay journals written directly by independent globetrotters.</p>
+      </div>
+    </section>
+
+    <section class="section-padding traveler-stories-section" aria-labelledby="traveler-stories-title">
+      <div class="container">
+        <div class="stories-heading"><span class="kicker">Notes from the Road</span><h2 id="traveler-stories-title" class="font-serif">Traveler Stories</h2></div>
+        <div class="traveler-stories-grid" id="traveler-stories-list">
+          <article class="traveler-story-card"><div class="traveler-story-meta"><span class="story-sample-label">Sample story</span><span>Petra, Jordan</span></div><h3>Petra before the crowds</h3><p>We arrived early and walked the Siq in the quiet. Seeing the Treasury appear at the end was the moment I had imagined for years.</p><footer>Lina Haddad <span>United Kingdom</span></footer></article>
+          <article class="traveler-story-card"><div class="traveler-story-meta"><span class="story-sample-label">Sample story</span><span>Wadi Rum, Jordan</span></div><h3>A night under desert skies</h3><p>Our hosts shared tea and stories around the fire. The stars were incredible, but the warmth of the welcome stayed with us most.</p><footer>Maya Chen <span>Singapore</span></footer></article>
+          <article class="traveler-story-card"><div class="traveler-story-meta"><span class="story-sample-label">Sample story</span><span>Amman, Jordan</span></div><h3>Getting happily lost downtown</h3><p>We followed the smell of fresh bread through the market lanes and ended up sharing lunch with a shopkeeper. A perfect afternoon.</p><footer>Daniel Ruiz <span>Spain</span></footer></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Share Your Story Form -->
+    <section class="section-padding">
+      <div class="container story-form-container">
+        <div class="step-box story-form-box">
+          <span class="kicker">Inspire Others</span>
+          <h2 class="font-serif" style="font-size: 1.85rem; margin-bottom: 0.5rem;">Share Your Jordan Story</h2>
+          <p style="font-size: 0.8rem; color: #78716C; margin-bottom: 1.5rem;">Your narratives help fellow travelers discover remote trails and support family hosts.</p>
+
+          <form id="story-form" style="display: flex; flex-direction: column; gap: 12px;">
+            <label class="sr-only" for="story-title">Story title</label>
+            <input id="story-title" type="text" class="search-input" placeholder="Story Title (e.g. Hiking the High Altars of Petra)" required>
+            <label class="sr-only" for="story-author">Your name and country</label>
+            <input id="story-author" type="text" class="search-input" placeholder="Your Name and Country" required>
+            <label class="sr-only" for="story-content">Your Jordan story</label>
+            <textarea id="story-content" class="search-input" rows="4" placeholder="Share your Bedouin camp stories, favorite dishes, or remote trail views..." required></textarea>
+            <label for="story-photo" class="story-photo-label">Add a photo (optional)</label>
+            <input id="story-photo" type="file" class="search-input" accept="image/*">
+            <div id="story-photo-preview" class="story-photo-preview" hidden><img alt="Preview of your story photo"><button type="button" id="remove-story-photo" aria-label="Remove selected photo">Remove photo</button></div>
+            <button type="submit" class="btn-primary" style="justify-content: center;">Submit Story</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================================
+       PAGE 9: Saved Trip Calendar View
+       ========================================================================= -->
+  <main id="view-saved" class="view-section">
+    <div class="container" style="padding-top: 3rem; padding-bottom: 5rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+        <div>
+          <span class="kicker">Your Bespoke Schedule</span>
+          <h1 class="page-title font-serif">Saved Trip Calendar</h1>
+        </div>
+        <button class="btn-primary" onclick="window.print()">Export / Print Itinerary</button>
+      </div>
+
+      <div class="saved-calendar-layout">
+        <section class="step-box trip-overview-box" aria-labelledby="trip-overview-title">
+          <h2 id="trip-overview-title" class="font-serif">Trip Overview</h2>
+          <div id="trip-overview-content"></div>
+        </section>
+
+        <section class="step-box booked-experiences-box" aria-labelledby="booked-experiences-title">
+          <h2 id="booked-experiences-title" class="font-serif">Local Experience Requests</h2>
+          <p class="trip-empty-note">Requests are saved to this trip; they are not confirmed reservations.</p>
+          <div id="booked-experiences-list"></div>
+        </section>
+
+        <!-- Calendar -->
+        <div class="step-box saved-calendar-box">
+          <h3 class="font-serif" style="font-size: 1.15rem; margin-bottom: 1rem;">October 2026</h3>
+          <div class="calendar-grid" id="calendar-grid"></div>
+        </div>
+
+        <section class="step-box selected-day-box" aria-labelledby="selected-day-title">
+          <div class="saved-panel-heading"><h3 id="selected-day-title" class="font-serif" style="font-size: 1.15rem;">Planned for this day</h3><span id="selected-day-label"></span></div>
+          <div id="selected-day-items"></div>
+        </section>
+
+        <!-- Saved Places List -->
+        <div class="step-box saved-destinations-box">
+          <h3 class="font-serif" style="font-size: 1.15rem; margin-bottom: 1rem;">Saved Destinations</h3>
+          <div id="saved-items-list"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- =========================================================================
+       Footer
+       ========================================================================= -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="brand" style="margin-bottom: 1rem;">
+            <div class="brand-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l2.3 5.4 5.7-.8-3.4 4.8 3.3 4.9-5.7-.7L12 22l-2.2-5.4-5.7.7 3.3-4.9-3.4-4.8 5.7.8z"/>
+              </svg>
+            </div>
+            <span class="brand-name">Darbak Jordan</span>
+          </div>
+          <p style="font-size: 0.8rem; color: #A8A29E; line-height: 1.6; max-width: 320px;">
+            Darbak is your modern compass to the wonders of Jordan. Plan bespoke itineraries, discover hidden desert oases, and connect with authentic local hosts.
+          </p>
+          <form class="newsletter-form" id="newsletter-form">
+            <input type="email" class="newsletter-input" placeholder="Your email address" required>
+            <button type="submit" class="newsletter-btn">Join</button>
+          </form>
+        </div>
+
+        <div>
+          <h4 class="footer-title">Explore Jordan</h4>
+          <ul class="footer-links">
+            <li><a href="#explore" data-target="explore">Petra & The South</a></li>
+            <li><a href="#explore" data-target="explore">Amman Citadel</a></li>
+            <li><a href="#explore" data-target="explore">Dead Sea Wellness</a></li>
+            <li><a href="#explore" data-target="explore">Wadi Rum Camps</a></li>
+            <li><a href="#explore" data-target="explore">Aqaba Marine Life</a></li>
+            <li><a href="#explore" data-target="explore">Jerash Ruins</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-title">What We Offer</h4>
+          <ul class="footer-links">
+            <li><a href="#dream-trip" data-target="dream-trip">Custom Trip Designer</a></li>
+            <li><a href="#local" data-target="local">Local Guides Directory</a></li>
+            <li><a href="#jmap" data-target="jmap">Interactive JMap</a></li>
+            <li><a href="#about" data-target="about">Cultural Deep-Dives</a></li>
+            <li><a href="#local" data-target="local">Homestays & Cooking</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-title">Contact & Office</h4>
+          <p style="font-size: 0.8rem; color: #A8A29E; margin-bottom: 6px;">Harmony Tower, Rainbow Street, Amman</p>
+          <p style="font-size: 0.8rem; color: #A8A29E; margin-bottom: 6px;">+962 6 550 4321</p>
+          <p style="font-size: 0.8rem; color: #A8A29E; margin-bottom: 12px;">concierge@darbakjordan.com</p>
+          <div class="footer-social-links" aria-label="Social media">
+            <a href="https://www.instagram.com/explore/tags/visitjordan/" aria-label="Find Jordan on Instagram" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="18" cy="6" r="1" class="icon-fill"></circle></svg></a>
+            <a href="https://www.facebook.com/search/top?q=visit%20jordan" aria-label="Find Jordan on Facebook" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 21v-8h3l.5-4H14V7c0-1.2.4-2 2-2h1.7V1.4C17 1.2 15.8 1 14.4 1 11.4 1 9.5 2.8 9.5 6v3H6v4h3.5v8z" class="icon-fill"></path></svg></a>
+            <a href="https://www.youtube.com/results?search_query=visit+jordan" aria-label="Find Jordan on YouTube" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="4"></rect><path d="m10 9 5 3-5 3z" class="icon-fill"></path></svg></a>
+            <a href="https://x.com/search?q=Jordan%20travel" aria-label="Find Jordan travel on X" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h4.5l11.5 18h-4.5zM20 3 4 21"></path></svg></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 Darbak Jordan. All rights reserved.</p>
+        <p>Built with Pure HTML, CSS & JavaScript for VS Code</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =========================================================================
+       Modals
+       ========================================================================= -->
+  <div id="place-modal" class="modal-overlay" role="presentation">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="place-modal-title" tabindex="-1">
+      <button class="modal-close" type="button" aria-label="Close place details" onclick="closeModal('place-modal')">✕</button>
+      <div id="place-modal-body"></div>
+    </div>
+  </div>
+
+  <div id="story-modal" class="modal-overlay" role="presentation">
+    <div class="modal-dialog story-dialog" role="dialog" aria-modal="true" aria-labelledby="story-detail-title" tabindex="-1">
+      <button class="modal-close" type="button" aria-label="Close traveler story" onclick="closeModal('story-modal')">×</button>
+      <img id="story-detail-image" class="story-detail-image" alt="" hidden>
+      <div class="story-detail-body">
+        <div class="traveler-story-meta"><span id="story-detail-location"></span><span id="story-detail-date"></span></div>
+        <h2 id="story-detail-title" class="font-serif"></h2>
+        <p id="story-detail-author" class="story-detail-author"></p>
+        <div id="story-detail-content" class="story-detail-content"></div>
+        <button type="button" id="story-detail-like" class="story-like-button"></button>
+        <section class="story-comments" aria-labelledby="story-comments-title">
+          <h3 id="story-comments-title">Comments</h3>
+          <div id="story-comments-list"></div>
+          <form id="story-comment-form">
+            <label for="story-comment-input">Add a comment</label>
+            <textarea id="story-comment-input" class="search-input" rows="2" maxlength="500" required></textarea>
+            <button class="btn-primary" type="submit">Post comment</button>
+          </form>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div id="booking-modal" class="modal-overlay" role="presentation">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title" tabindex="-1" style="padding: 2rem;">
+      <button class="modal-close" type="button" aria-label="Close booking form" onclick="closeModal('booking-modal')">✕</button>
+      <h3 id="booking-modal-title" class="font-serif" style="font-size: 1.5rem; margin-bottom: 1rem;">Request Local Experience</h3>
+      <form id="booking-form" style="display: flex; flex-direction: column; gap: 12px;">
+        <input id="booking-experience-id" type="hidden">
+        <div id="booking-experience-summary" class="booking-experience-summary"></div>
+        <label for="booking-contact-name" class="booking-field-label">Your name</label>
+        <input id="booking-contact-name" type="text" class="search-input" autocomplete="name" required>
+        <label for="booking-contact-email" class="booking-field-label">Email address</label>
+        <input id="booking-contact-email" type="email" class="search-input" autocomplete="email" required>
+        <label for="booking-date" class="booking-field-label">Preferred date</label>
+        <input id="booking-date" type="date" class="search-input" required>
+        <label for="booking-guests" class="booking-field-label">Number of guests</label>
+        <input id="booking-guests" type="number" min="1" max="10" value="2" class="search-input" required>
+        <p id="booking-price-estimate" class="booking-price-estimate" aria-live="polite"></p>
+        <label for="booking-notes" class="booking-field-label">Notes for the host</label>
+        <textarea id="booking-notes" class="search-input" rows="3" placeholder="Accessibility needs, dietary notes, or questions"></textarea>
+        <button type="submit" class="btn-primary" style="justify-content: center; margin-top: 10px;">Submit Booking Request</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="auth-modal" class="modal-overlay" role="presentation">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title" tabindex="-1" style="padding: 2rem; max-width: 420px;">
+      <button class="modal-close" type="button" aria-label="Close sign-in" onclick="closeModal('auth-modal')">✕</button>
+      <div style="text-align: center; margin-bottom: 1.5rem;">
+        <div class="brand-icon" style="margin: 0 auto 10px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l2.3 5.4 5.7-.8-3.4 4.8 3.3 4.9-5.7-.7L12 22l-2.2-5.4-5.7.7 3.3-4.9-3.4-4.8 5.7.8z"/>
+          </svg>
+        </div>
+        <h3 id="auth-modal-title" class="font-serif" style="font-size: 1.5rem;">Sign In to Darbak</h3>
+      </div>
+      <form id="auth-form" style="display: flex; flex-direction: column; gap: 12px;">
+        <input id="auth-name" type="text" class="search-input" aria-label="Your full name" placeholder="Your Full Name" style="display: none;">
+        <input id="auth-email" type="email" class="search-input" aria-label="Your email address" placeholder="Your Email Address" required>
+        <input id="auth-password" type="password" class="search-input" aria-label="Password" placeholder="Password" required>
+        <button id="auth-submit-btn" type="submit" class="btn-primary" style="justify-content: center; margin-top: 8px;">Sign In</button>
+      </form>
+      <div style="margin-top: 1rem; text-align: center;">
+        <button id="auth-mode-toggle" type="button" class="btn-link" style="font-size: 0.78rem; color: var(--primary); background: transparent; border: none; cursor: pointer;">Need an account? Create one</button>
+        <p id="auth-status-message" class="sr-only" aria-live="polite"></p>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+  <div id="google_translate_element" class="google-translate-host" aria-hidden="true"></div>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
