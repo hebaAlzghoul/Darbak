@@ -47,7 +47,7 @@
           <svg class="header-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4.5" r="2"></circle><path d="M4 8.5h16M12 8.5v4m0 0-4 8m4-8 4 8m-4-8-5-3m5 3 5-3"></path></svg>
         </button>
         <button class="btn-saved" id="btn-saved-header" data-target="saved">
-          My trip <span id="saved-count" class="saved-counter">3</span>
+          My trip
         </button>
         <button class="btn-login" id="btn-login-header">Login</button>
       </div>
@@ -466,7 +466,12 @@
         <div id="itinerary-results" class="itinerary-results" aria-live="polite"></div>
         <p id="itinerary-estimate" class="itinerary-estimate" hidden></p>
         <div class="itinerary-result-actions" id="itinerary-result-actions" hidden>
+          <div class="itinerary-date-control">
+            <label for="trip-start-date">Trip start date</label>
+            <input id="trip-start-date" type="date" class="search-input">
+          </div>
           <button class="btn-outline" id="edit-itinerary" type="button">Edit</button>
+          <button class="btn-outline" id="add-itinerary-to-calendar" type="button">Add to Calendar</button>
           <button class="btn-primary" id="save-itinerary" type="button">Save to My Trip</button>
         </div>
       </section>
@@ -725,7 +730,11 @@
 
         <!-- Calendar -->
         <div class="step-box saved-calendar-box">
-          <h3 class="font-serif" style="font-size: 1.15rem; margin-bottom: 1rem;">October 2026</h3>
+          <div class="calendar-heading">
+            <button type="button" class="btn-outline" aria-label="Previous month" onclick="changeCalendarMonth(-1)">←</button>
+            <h3 id="calendar-month-title" class="font-serif" style="font-size: 1.15rem; margin-bottom: 1rem;"></h3>
+            <button type="button" class="btn-outline" aria-label="Next month" onclick="changeCalendarMonth(1)">→</button>
+          </div>
           <div class="calendar-grid" id="calendar-grid"></div>
         </div>
 

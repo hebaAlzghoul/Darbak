@@ -325,13 +325,10 @@ let currentLanguage = 'en';
 let activeView = 'home';
 const DEFAULT_SAVED_PLACES = ['petra', 'wadi-rum', 'dead-sea'];
 let savedPlaces = readLocalData('darbak-saved-places', [...DEFAULT_SAVED_PLACES]);
-let scheduledPlaces = {
-  '2026-10-12': ['petra'],
-  '2026-10-13': ['wadi-rum'],
-  '2026-10-14': ['dead-sea']
-};
+let scheduledPlaces = readLocalData('darbak-scheduled-places', {});
 let favoritePlaces = new Set();
-let selectedCalendarDate = '2026-10-12';
+let selectedCalendarDate = toLocalDateString(new Date());
+let calendarViewDate = new Date(`${selectedCalendarDate}T12:00:00`);
 let activeMapPinId = 'petra';
 let jordanMap = null;
 let jordanMapMarkers = null;
@@ -466,12 +463,13 @@ async function initializeFirebaseIntegration() {
       localStorage.removeItem('darbak-saved-experiences');
       localStorage.removeItem('darbak-booked-experiences');
       localStorage.removeItem('darbak-trip-plans');
+      localStorage.removeItem('darbak-scheduled-places');
 
       updateSavedCount();
       renderWonders();
       renderExploreGrid();
       renderLocalGrid();
-      renderCalendar(2026, 9);
+      renderCalendar();
       renderSavedList();
       renderSavedTripDetails();
 
@@ -516,12 +514,36 @@ async function loadUserData(uid) {
   savedExperiences = new Set(savedExperiencesSnap.docs.map(doc => doc.id));
   favoriteExperiences = new Set(favoriteExperiencesSnap.docs.map(doc => doc.id));
   currentUserTrips = tripsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  if (currentUserTrips.length) {
+    savedTripPlans = currentUserTrips;
+    currentTripPlan = currentUserTrips[0];
+    if (currentTripPlan.startDate) {
+      selectedCalendarDate = currentTripPlan.startDate;
+      calendarViewDate = new Date(`${selectedCalendarDate}T12:00:00`);
+      const startDateInput = document.getElementById('trip-start-date');
+      if (startDateInput) startDateInput.value = selectedCalendarDate;
+    }
+    currentUserTrips.forEach(trip => {
+      if (!trip.startDate || !Array.isArray(trip.itinerary)) return;
+      const startDate = new Date(`${trip.startDate}T12:00:00`);
+      if (Number.isNaN(startDate.getTime())) return;
+      trip.itinerary.forEach((entry, index) => {
+        const date = new Date(startDate);
+        date.setDate(date.getDate() + index);
+        const dateKey = toLocalDateString(date);
+        scheduledPlaces[dateKey] ||= [];
+        if (!scheduledPlaces[dateKey].includes(entry.placeId)) scheduledPlaces[dateKey].push(entry.placeId);
+      });
+    });
+    writeLocalData('darbak-trip-plans', savedTripPlans);
+    writeLocalData('darbak-scheduled-places', scheduledPlaces);
+  }
 
   updateSavedCount();
   renderWonders();
   renderExploreGrid();
   renderLocalGrid();
-  renderCalendar(2026, 9);
+  renderCalendar();
   renderSavedList();
   updateActivePinCard();
 }
@@ -709,6 +731,8 @@ async function saveCurrentTripToFirestore() {
         budget: savedPlan.budget,
         estimatedCost: savedPlan.estimatedCost,
         itinerary: savedPlan.itinerary,
+        startDate: savedPlan.startDate || null,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
     } catch (error) {
@@ -931,7 +955,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderLocalGrid();
   renderTravelerStories();
   renderMapPins();
-  renderCalendar(2026, 9); // October 2026
+  const startDateInput = document.getElementById('trip-start-date');
+  if (startDateInput) startDateInput.value = toLocalDateString(new Date());
+  renderCalendar();
   updateSavedCount();
   setupNavigation();
   setupEventListeners();
@@ -1614,7 +1640,7 @@ async function toggleSave(placeId) {
   renderLocalGrid();
   renderSavedList();
   updateActivePinCard();
-  renderCalendar(2026, 9);
+  renderCalendar();
 }
 
 function updateSavedCount() {
@@ -1641,10 +1667,18 @@ function showToast(message, tone = 'info') {
 }
 
 // Render Calendar
-function renderCalendar(year, month) {
+function toLocalDateString(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function renderCalendar() {
   const grid = document.getElementById('calendar-grid');
   if (!grid) return;
 
+  const year = calendarViewDate.getFullYear();
+  const month = calendarViewDate.getMonth();
+  const monthTitle = document.getElementById('calendar-month-title');
+  if (monthTitle) monthTitle.textContent = calendarViewDate.toLocaleDateString('en', { month: 'long', year: 'numeric' });
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDay = new Date(year, month, 1).getDay();
 
@@ -1674,7 +1708,14 @@ function renderCalendar(year, month) {
 
 function selectDate(dateStr) {
   selectedCalendarDate = dateStr;
-  renderCalendar(2026, 9);
+  calendarViewDate = new Date(`${dateStr}T12:00:00`);
+  renderCalendar();
+}
+
+function changeCalendarMonth(offset) {
+  calendarViewDate = new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth() + offset, 1, 12);
+  selectedCalendarDate = toLocalDateString(calendarViewDate);
+  renderCalendar();
 }
 
 function renderSavedList() {
@@ -1790,8 +1831,65 @@ function schedulePlace(placeId) {
     scheduledPlaces[date] = scheduledPlaces[date].filter(id => id !== placeId);
   });
   scheduledPlaces[selectedCalendarDate] ||= [];
-  scheduledPlaces[selectedCalendarDate].push(placeId);
-  renderCalendar(2026, 9);
+  if (!scheduledPlaces[selectedCalendarDate].includes(placeId)) scheduledPlaces[selectedCalendarDate].push(placeId);
+  writeLocalData('darbak-scheduled-places', scheduledPlaces);
+  renderCalendar();
+}
+
+async function addItineraryToCalendar() {
+  if (!currentTripPlan?.itinerary?.length) {
+    showToast('Generate an itinerary before adding it to the calendar.', 'info');
+    return;
+  }
+
+  const startDateInput = document.getElementById('trip-start-date');
+  const startDateValue = startDateInput?.value;
+  const startDate = startDateValue ? new Date(`${startDateValue}T12:00:00`) : null;
+  if (!startDate || Number.isNaN(startDate.getTime())) {
+    showToast('Choose a valid trip start date.', 'error');
+    startDateInput?.focus();
+    return;
+  }
+
+  if (!requireAuth('add your itinerary to the calendar')) return;
+  currentTripPlan.startDate = startDateValue;
+  if (!await saveCurrentTripToFirestore()) return;
+
+  const placeIds = [...new Set(currentTripPlan.itinerary.map(entry => entry.placeId))];
+  const newPlaceIds = placeIds.filter(placeId => !savedPlaces.includes(placeId));
+  if (newPlaceIds.length && firebaseState.db && firebaseState.user) {
+    try {
+      const batch = firebaseState.db.batch();
+      newPlaceIds.forEach(placeId => {
+        const placeRef = firebaseState.db.collection('users').doc(firebaseState.user.uid).collection('savedPlaces').doc(placeId);
+        batch.set(placeRef, { placeId, savedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+      });
+      await batch.commit();
+    } catch (error) {
+      showToast('The trip is scheduled on this device, but some places could not sync to your account.', 'info');
+    }
+  }
+  savedPlaces = [...new Set([...savedPlaces, ...placeIds])];
+
+  placeIds.forEach(placeId => {
+    Object.keys(scheduledPlaces).forEach(date => {
+      scheduledPlaces[date] = scheduledPlaces[date].filter(id => id !== placeId);
+    });
+  });
+  currentTripPlan.itinerary.forEach((entry, index) => {
+    const itineraryDate = new Date(startDate);
+    itineraryDate.setDate(itineraryDate.getDate() + index);
+    const date = toLocalDateString(itineraryDate);
+    scheduledPlaces[date] ||= [];
+    if (!scheduledPlaces[date].includes(entry.placeId)) scheduledPlaces[date].push(entry.placeId);
+  });
+
+  selectedCalendarDate = startDateValue;
+  calendarViewDate = new Date(`${startDateValue}T12:00:00`);
+  writeLocalData('darbak-scheduled-places', scheduledPlaces);
+  updateSavedCount();
+  renderCalendar();
+  showToast('Your designed trip and its saved places are now on the calendar.', 'success');
 }
 
 async function sendItineraryNotification(placeId) {
@@ -2147,6 +2245,7 @@ function setupEventListeners() {
     renderGeneratedItinerary();
   });
   document.getElementById('save-itinerary')?.addEventListener('click', saveCurrentTripToFirestore);
+  document.getElementById('add-itinerary-to-calendar')?.addEventListener('click', addItineraryToCalendar);
   document.getElementById('itinerary-results')?.addEventListener('change', event => {
     const select = event.target.closest('[data-itinerary-place]');
     if (!select || !currentTripPlan) return;

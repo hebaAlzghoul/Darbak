@@ -893,6 +893,8 @@ img {
   background: #fff;
 }
 
+.calendar-heading { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.calendar-heading h3 { flex: 1; margin: 0 !important; text-align: center; }
 .calendar-weekday {
   padding: 4px 6px;
   color: var(--text-muted);
@@ -1451,7 +1453,9 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 .custom-days-control { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 1rem; color: var(--text-muted); font-size: 0.78rem; }
 .custom-days-control input { width: 120px; }
 .itinerary-estimate { margin-top: 1rem; color: var(--text-muted); font-size: 0.82rem; }
-.itinerary-result-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1rem; }
+.itinerary-result-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 1rem; }
+.itinerary-date-control { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-inline-end: auto; color: var(--text-muted); font-size: 0.78rem; }
+.itinerary-date-control .search-input { width: auto; min-width: 150px; padding: 8px 10px; }
 .itinerary-edit-controls { display: flex; align-items: center; gap: 6px; margin-top: 0.75rem; }
 .itinerary-edit-controls select { min-width: 0; flex: 1; padding: 7px 9px; }
 .itinerary-edit-controls button { min-width: 36px; min-height: 36px; padding: 5px 10px; }
