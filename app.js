@@ -316,7 +316,7 @@ const DEFAULT_TRAVELER_STORIES = [
   { id: 'sample-amman', author: 'Daniel Ruiz', country: 'Spain', location: 'Amman, Jordan', title: 'Getting happily lost downtown', content: 'We followed the smell of fresh bread through the market lanes and stopped for falafel, tea, and a long conversation with a shopkeeper. Downtown is easier to enjoy when you leave space in the afternoon and ask before photographing people. We finished the day walking back toward the Roman Theater as the light softened.', image: 'assets/amman_citadel.jpg', likes: 11, sample: true }
 ];
 
-let travelerStories = readLocalData('darbak-stories', [...DEFAULT_TRAVELER_STORIES]);
+let travelerStories = [...DEFAULT_TRAVELER_STORIES];
 let storyEngagement = readLocalData('darbak-story-engagement', {});
 let activeStoryId = null;
 let storyPhotoDataUrl = '';
@@ -744,6 +744,10 @@ async function saveCurrentTripToFirestore() {
   return true;
 }
 
+function canDeleteStory(story) {
+  return Boolean(story && !story.sample && firebaseState.user?.uid && story.userId === firebaseState.user.uid);
+}
+
 function createStoryCard(story) {
   const article = document.createElement('article');
   article.className = 'traveler-story-card';
@@ -789,10 +793,19 @@ function createStoryCard(story) {
   country.textContent = story.country || 'Jordan';
   footer.append(author, country);
 
-  const engagement = storyEngagement[story.id] || { liked: false, comments: [] };
+  const engagement = storyEngagement[story.id] || { liked: false };
   const actions = document.createElement('div');
   actions.className = 'story-card-actions';
-  actions.innerHTML = `<button type="button" class="story-like-button" data-story-like="${story.id}" aria-pressed="${Boolean(engagement.liked)}">♥ <span>${Number(story.likes || 0) + (engagement.liked ? 1 : 0)}</span></button><button type="button" class="story-comment-button" data-story-open="${story.id}">Comments <span>${engagement.comments?.length || 0}</span></button>`;
+  actions.innerHTML = `<button type="button" class="story-like-button" data-story-like="${story.id}" aria-pressed="${Boolean(engagement.liked)}">♥ <span>${Number(story.likes || 0) + (engagement.liked ? 1 : 0)}</span></button>`;
+  if (canDeleteStory(story)) {
+    const deleteButton = document.createElement('button');
+    deleteButton.type = 'button';
+    deleteButton.className = 'story-delete-button';
+    deleteButton.dataset.storyDelete = story.id;
+    deleteButton.setAttribute('aria-label', `Delete your story: ${story.title || 'Travel story'}`);
+    deleteButton.textContent = 'Delete';
+    actions.appendChild(deleteButton);
+  }
 
   article.append(meta, openButton, footer, actions);
   return article;
@@ -805,42 +818,84 @@ function renderTravelerStories(stories = travelerStories) {
 }
 
 async function loadStoriesFromFirestore() {
-  let remoteStories = [];
-  if (firebaseState.db && firebaseState.user) {
-    try {
-      const snapshot = await firebaseState.db.collection('stories').orderBy('createdAt', 'desc').limit(12).get();
-      remoteStories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), sample: false }));
-    } catch (error) {
-      console.warn('Unable to load traveler stories from Firebase:', error);
-    }
-  }
-  const remoteIds = new Set(remoteStories.map(story => story.id));
-  travelerStories = [...remoteStories, ...travelerStories.filter(story => !remoteIds.has(story.id))];
-  renderTravelerStories();
-}
-
-function renderStoryComments(story) {
-  const container = document.getElementById('story-comments-list');
-  if (!container) return;
-  const comments = storyEngagement[story.id]?.comments || [];
-  container.replaceChildren();
-  if (!comments.length) {
-    const empty = document.createElement('p');
-    empty.className = 'trip-empty-note';
-    empty.textContent = 'No comments yet.';
-    container.appendChild(empty);
+  if (!firebaseState.db) {
+    travelerStories = [...DEFAULT_TRAVELER_STORIES];
+    renderTravelerStories();
     return;
   }
-  comments.forEach(comment => {
-    const item = document.createElement('article');
-    item.className = 'story-comment';
-    const author = document.createElement('strong');
-    author.textContent = comment.author || 'Traveler';
-    const content = document.createElement('p');
-    content.textContent = comment.content || '';
-    item.append(author, content);
-    container.appendChild(item);
-  });
+
+  try {
+    const storiesRef = firebaseState.db.collection('stories');
+
+    const snapshot = await storiesRef
+      .orderBy('createdAt', 'desc')
+      .limit(50)
+      .get();
+
+    const remoteStories = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      sample: false
+    }));
+
+    /*
+     * Keep the built-in Darbak sample stories
+     * AND add the stories published through Firebase.
+     *
+     * Firebase is still the source of truth for
+     * user-published stories.
+     */
+    travelerStories = [
+      ...remoteStories,
+      ...DEFAULT_TRAVELER_STORIES
+    ];
+
+    /*
+     * Keep localStorage synchronized with Firebase.
+     * We do NOT use localStorage to restore stories.
+     */
+    writeLocalData('darbak-stories', remoteStories);
+
+    renderTravelerStories();
+
+  } catch (error) {
+    console.warn(
+      'Unable to load traveler stories from Firebase:',
+      error
+    );
+
+    /*
+     * If Firebase cannot be reached, show only
+     * the built-in sample stories rather than
+     * potentially stale local stories.
+     */
+    travelerStories = [...DEFAULT_TRAVELER_STORIES];
+
+    renderTravelerStories();
+  }
+}
+
+async function deleteTravelerStory(storyId) {
+  const story = travelerStories.find(item => item.id === storyId);
+  if (!story || story.sample) return;
+  if (!firebaseState.user || story.userId !== firebaseState.user.uid) {
+    showToast('You can only delete stories you published.', 'error');
+    return;
+  }
+  if (!window.confirm(`Delete “${story.title || 'this story'}”? This cannot be undone.`)) return;
+
+  try {
+    await firebaseState.db.collection('stories').doc(storyId).delete();
+    travelerStories = travelerStories.filter(item => item.id !== storyId);
+    delete storyEngagement[storyId];
+    writeLocalData('darbak-stories', travelerStories);
+    writeLocalData('darbak-story-engagement', storyEngagement);
+    renderTravelerStories();
+    if (activeStoryId === storyId) closeModal('story-modal');
+    showToast('Your story was deleted.', 'success');
+  } catch (error) {
+    showToast(getFriendlyErrorMessage(error, 'Your story could not be deleted. Please try again.'), 'error');
+  }
 }
 
 function openTravelerStory(storyId) {
@@ -856,18 +911,19 @@ function openTravelerStory(storyId) {
   document.getElementById('story-detail-date').textContent = story.createdAt ? new Date(story.createdAt).toLocaleDateString() : 'Sample story';
   document.getElementById('story-detail-author').textContent = `${story.author || 'Traveler'} · ${story.country || 'Jordan'}`;
   document.getElementById('story-detail-content').textContent = story.content || '';
-  const engagement = storyEngagement[storyId] || { liked: false, comments: [] };
+  const engagement = storyEngagement[storyId] || { liked: false };
   const likeButton = document.getElementById('story-detail-like');
+  const deleteButton = document.getElementById('story-detail-delete');
+  deleteButton.hidden = !canDeleteStory(story);
   likeButton.textContent = `${engagement.liked ? '♥ Liked' : '♡ Like'} · ${Number(story.likes || 0) + (engagement.liked ? 1 : 0)}`;
   likeButton.setAttribute('aria-pressed', String(Boolean(engagement.liked)));
-  renderStoryComments(story);
   lastFocusedElement = document.activeElement;
   modal.classList.add('open');
   modal.querySelector('.modal-close')?.focus();
 }
 
 function toggleTravelerStoryLike(storyId) {
-  const engagement = storyEngagement[storyId] || { liked: false, comments: [] };
+  const engagement = storyEngagement[storyId] || { liked: false };
   engagement.liked = !engagement.liked;
   storyEngagement[storyId] = engagement;
   writeLocalData('darbak-story-engagement', storyEngagement);
@@ -890,6 +946,11 @@ function readStoryPhoto(file) {
 function setupStoryInteractions() {
   const container = document.getElementById('traveler-stories-list');
   container?.addEventListener('click', event => {
+    const deleteButton = event.target.closest('[data-story-delete]');
+    if (deleteButton) {
+      deleteTravelerStory(deleteButton.dataset.storyDelete);
+      return;
+    }
     const likeButton = event.target.closest('[data-story-like]');
     if (likeButton) {
       toggleTravelerStoryLike(likeButton.dataset.storyLike);
@@ -907,20 +968,9 @@ function setupStoryInteractions() {
   document.getElementById('story-detail-like')?.addEventListener('click', () => {
     if (activeStoryId) toggleTravelerStoryLike(activeStoryId);
   });
-  document.getElementById('story-comment-form')?.addEventListener('submit', event => {
-    event.preventDefault();
-    const content = document.getElementById('story-comment-input').value.trim();
-    if (!activeStoryId || !content) return;
-    const engagement = storyEngagement[activeStoryId] || { liked: false, comments: [] };
-    engagement.comments.push({ author: 'You', content, createdAt: new Date().toISOString() });
-    storyEngagement[activeStoryId] = engagement;
-    writeLocalData('darbak-story-engagement', storyEngagement);
-    document.getElementById('story-comment-input').value = '';
-    const story = travelerStories.find(item => item.id === activeStoryId);
-    if (story) renderStoryComments(story);
-    renderTravelerStories();
+  document.getElementById('story-detail-delete')?.addEventListener('click', () => {
+    if (activeStoryId) deleteTravelerStory(activeStoryId);
   });
-
   document.getElementById('story-photo')?.addEventListener('change', async event => {
     const preview = document.getElementById('story-photo-preview');
     try {
@@ -2341,6 +2391,7 @@ function setupEventListeners() {
 
   document.getElementById('story-form')?.addEventListener('submit', async event => {
     event.preventDefault();
+    if (firebaseState.ready && !requireAuth('publish a story')) return;
     const title = document.getElementById('story-title')?.value.trim();
     const authorInput = document.getElementById('story-author')?.value.trim();
     const content = document.getElementById('story-content')?.value.trim();
@@ -2362,12 +2413,11 @@ function setupEventListeners() {
       location: country === 'Jordan' ? 'Jordan' : `Jordan · ${country}`,
       content,
       image: storyPhotoDataUrl,
+      userId: firebaseState.user?.uid || null,
       likes: 0,
       sample: false,
       createdAt: new Date().toISOString()
     };
-    travelerStories = [story, ...travelerStories.filter(item => item.id !== story.id)];
-    writeLocalData('darbak-stories', travelerStories);
     if (firebaseState.user && firebaseState.db) {
       try {
         await firebaseState.db.collection('stories').doc(story.id).set({
@@ -2381,14 +2431,15 @@ function setupEventListeners() {
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
       } catch (error) {
-        showToast('Story saved on this device; cloud sync failed.', 'info');
+        showToast(getFriendlyErrorMessage(error, 'Your story could not be published. Please try again.'), 'error');
+        return;
       }
     }
-    renderTravelerStories();
+    await loadStoriesFromFirestore();
     event.target.reset();
     storyPhotoDataUrl = '';
     document.getElementById('story-photo-preview').hidden = true;
-    showToast('Your story was added to this device.', 'success');
+    showToast(firebaseState.user && firebaseState.db ? 'Your story was published.' : 'Your story was added on this device.', 'success');
     showView('stories');
   });
 
